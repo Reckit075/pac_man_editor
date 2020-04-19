@@ -20,32 +20,32 @@
             </div>
         </div>
         <div>
-            <p class="map">Map(automat:<input type="checkbox">)</p>
+            <p class="map">Map(automat:<input id="automat" type="checkbox">)</p>
             <div id="empty_fields">
                 <div id="menu">
                     <table>
-                        <tr>
+                        <tr id="tr_undo">
                             <td>Undo <span>Ctrl+Z</span></td>
                         </tr>
-                        <tr>
+                        <tr id="tr_redo">
                             <td>Redo<span>Ctrl+Y</span></td>
                         </tr>
-                        <tr>
+                        <tr id="tr_cut">
                             <td>Cut<span>Ctrl+X</span></td>
                         </tr>
-                        <tr>
+                        <tr id="tr_copy">
                             <td>Copy<span>Ctrl+C</span></td>
                         </tr>
-                        <tr>
+                        <tr id="tr_paste">
                             <td>Past<span>Ctrl+V</span></td>
                         </tr>
-                        <tr>
+                        <tr id="tr_delete">
                             <td>Delete<span>Del</span></td>
                         </tr>
-                        <tr>
+                        <tr id="tr_save">
                             <td>Save to file<span>Ctrl+S</span></td>
                         </tr>
-                        <tr>
+                        <tr id="tr_load">
                             <td>Load data from file<span>Ctrl+L</span></td>
                         </tr>
                     </table>
@@ -56,77 +56,29 @@
     </div>
 
     <script>
-        class Square {
-            constructor(src, width, height, sx, sy) {
-                this.src = src
+        class Field {
+            constructor(image, width, height, sx, sy) {
+                this.canvas = document.createElement("canvas")
+                this.canvas.width = width
+                this.canvas.height = height
+                this.canvas.classList.add("field")
+
+                this.image = image
                 this.width = width
                 this.height = height
-                this.canvas = document.createElement("canvas")
+
                 this.sx = sx
                 this.sy = sy
 
-                this.canvas.width = width
-                this.canvas.height = height
                 this.ctx = this.canvas.getContext("2d")
-                this.img = new Image()
-                this.img.src = src
-                this.canvas.classList.add("border")
 
                 this.init()
             }
 
-            // init() {
-            //     this.img.addEventListener("load", () => {
-            //         this.ctx.drawImage(this.img, this.sx, this.sy, 48, 48, 0, 0, this.width, this.height)
-            //     })
-            //     this.canvas.addEventListener("mouseover", () => {
-            //         this.canvas.style.border = "1px solid red"
-            //         this.canvas.style.cursor = "pointer"
-            //         this.canvas.style.filter = "brightness(100%)"
-            //     })
-            //     this.canvas.addEventListener("mouseout", () => {
-            //         this.canvas.style = ""
-            //     })
-            //     this.canvas.addEventListener("click", () => {
-            //         // sx = this.sx
-            //         // sy = this.sy
-            //         let selected = document.querySelectorAll(".selected")
-            //         if (selected.length != 0) {
-            //             for (let i = 0; i < selected.length; i++) {
-            //                 selected[i].getContext('2d').drawImage(this.img, this.sx, this.sy, 48, 48, 0, 0, 25, 25)
-            //             }
-            //         } else {
-            //             selected[0].getContext("2d").drawImage(this.img, this.sx, this.sy, 48, 48, 0, 0, 25, 25)
-            //         }
+            init() {
+                this.ctx.drawImage(this.image, this.sx, this.sy, 48, 48, 0, 0, this.width, this.height)
+            }
 
-            //         let automat = document.querySelector(".map input")
-
-            //         if (automat.checked == true) {
-            //             for (let y in this.tablicaLogiczna) {
-            //                 for (let x in this.tablicaLogiczna[y]) {
-            //                     if (this.tablicaLogiczna[y][x].classList.contains('selected') == true) {
-            //                         if (x < 39) {
-            //                             this.tablicaLogiczna[y][x].classList.remove('selected')
-            //                             this.tablicaLogiczna[y][Number(x) + 1].classList.add('selected')
-            //                             console.log(this.tablicaLogiczna[y][x])
-            //                             return
-            //                         } else {
-            //                             this.tablicaLogiczna[y][39].classList.remove('selected')
-            //                             x = 0
-            //                             y = Number(y) + 1
-            //                             this.tablicaLogiczna[y][x].classList.add('selected')
-            //                             return
-            //                         }
-            //                     }
-            //                 }
-            //             }
-            //         }
-
-
-            //         imgData = this.img, this.sx, this.sy, 48, 48, 0, 0, this.width, this.height
-            //     })
-
-            // }
             getHtml() {
                 return this.canvas
             }
@@ -134,59 +86,72 @@
 
 
         /*klasa puste pola*/
-        class EmptyFields {
-            constructor(width, height) {
-                this.width = width
-                this.height = height
-                this.canvas = document.createElement("canvas")
-                this.ctx = this.canvas.getContext("2d")
+        class EmptyField {
+            constructor(image, width, height, x, y, selectedFields) {
+                this.selectedFields = selectedFields
 
+                this.canvas = document.createElement("canvas")
+
+                this.canvas.id = x + "_" + y
                 this.canvas.classList.add("empty_fields")
                 this.canvas.width = width
                 this.canvas.height = height
 
-                this.img = new Image()
-                this.img.src = "spritesheet.png"
+                this.ctx = this.canvas.getContext("2d")
 
-                this.init()
+                this.x = x
+                this.y = y
+
+                this.ix = 0
+                this.iy = 100
+
+                this.image = image
             }
+
             init() {
-                let flaga = false;
-                let doubleClick = false
-                let number = 0
-                this.ctx.rect(27, 27, this.width, this.height)
-                // this.square = ctx2.rect()       
-                this.canvas.addEventListener("mouseover", () => {
-                    // this.canvas.style.border = "1px dashed red"
-                    this.canvas.style.cursor = "pointer"
-                })
-                this.canvas.addEventListener("mouseout", () => {
-                    if (flaga == false) {
-                        this.canvas.style = ""
-                    }
-                })
-                this.img.addEventListener("load", () => {
-                    this.canvas.addEventListener("click", () => {
-                        let selected = document.getElementsByClassName("selected");
-                        for (let i = selected.length - 1; i >= 0; i--) { //pętla od tyłu w celu usunięcia wszystkich selected
-                            if (ctrlActive == false) {
-                                selected[i].classList.remove("selected")
-                            }
-                        }
-                        this.canvas.classList.add("selected")
-                        number += 1
-                        flaga = true
-
-                        if ((number % 2 == false)) {
-                            this.canvas.style = ""
-                        }
-                    })
-                })
+                this.clearField()
             }
+
+            setFieldSelected() {
+                this.canvas.classList.add("selected")
+                this.selectedFields.push(this)
+            }
+
+            setFieldUnSelected() {
+                this.canvas.classList.remove("border-green")
+                this.canvas.classList.remove("selected")
+                let i = this.selectedFields.indexOf(this)
+                if (i == -1) return
+
+                this.selectedFields.splice(i, 1)
+            }
+
+            setImagePositon(ix, iy) {
+                this.ix = ix
+                this.iy = iy
+            }
+
+            fillField() {
+                this.ctx.drawImage(this.image, this.ix, this.iy, 48, 48, 0, 0, 25, 25)
+            }
+
+            fillFieldHover(ix, iy) {
+                this.ctx.drawImage(this.image, ix, iy, 48, 48, 0, 0, 25, 25)
+                this.canvas.classList.add("border-green")
+            }
+
+            clearField() {
+                this.ctx.drawImage(this.image, 0, 100, 48, 48, 0, 0, 25, 25)
+                this.ix = 0
+                this.iy = 100
+            }
+
             getHtml() {
                 return this.canvas
             }
         }
+
+
 
 
         class Game {
@@ -202,26 +167,447 @@
             constructor() {
                 this.ctrlActive = false //czy ctrl jest aktywny
                 this.createBlockActive = false //czy rysowanie blocku jest aktywne
-                this.automat = document.querySelector('input') //automat
+                this.automat = document.querySelector('#automat') //automat
 
                 this.menu = document.getElementById('menu') //menu po kliknieciu prawym myszki
                 this.selectionBlock = document.getElementById('selectionBlock')
                 this.divItems = document.getElementById("items") //miejsce do przetrzymywania obrazkow =>lewa strona
                 this.emptyFields = document.getElementById("empty_fields") //miejsce dla pustych pol => prawa strona
                 this.tablicaLogiczna = [] //=>tablica przetrzymuje pozycje wszystkich pustych pol
+                this.selectedFields = []
 
-                this.init()
+                this.copyFields = [] //=>tablica przetrzymuje pozycje wszystkich skopiowanych pol
+
+                this.historyContent = []
+                this.indexInHistoryContent = 0
+                this.historyFlag = false
+
+                this.pasteActive = false
+
+                this.copiedFieldsData = []
+
+                this.mouseFieldX = 0
+                this.mouseFieldY = 0
+
+                this.image = new Image()
+                this.image.src = "spritesheet.png"
+                this.image.addEventListener("load", e => {
+                    this.init()
+                })
             }
 
             init() {
-                this.createFields()
-                this.addAutomatClick()
+                this.createLeftPanelFields()
+                this.createRightPanelFields()
                 this.addKeyListeners()
                 this.addSelectFieldsListeners()
                 this.addMenuListeners()
+
+                this.initHistory()
             }
 
-            createFields() {
+            addKeyListeners() {
+                // KEYUP
+                window.addEventListener("keyup", (e) => {
+                    e.preventDefault()
+                    switch (e.keyCode) {
+                        case 17: // CTRL
+                            if (navigator.userAgent.includes('Windows')) {
+                                this.ctrlActive = false
+                            }
+                            break
+
+                        case 93:
+                            if (navigator.userAgent.includes('Macintosh')) {
+                                this.ctrlActive = false
+                            }
+                            break
+                    }
+                })
+
+
+                // KEYDOWN
+                window.addEventListener("keydown", (e) => {
+                    e.preventDefault()
+                    switch (e.keyCode) {
+                        case 17: // CTRL
+                            if (navigator.userAgent.includes('Windows')) {
+                                this.ctrlActive = true
+                            }
+                            break
+
+                        case 93:
+                            if (navigator.userAgent.includes('Macintosh')) {
+                                this.ctrlActive = true
+                            }
+                            break
+
+                        case 46:
+                            this.deleteSelectedFields()
+                            break
+
+                        case 90: // Z
+                            if (!this.ctrlActive) return
+                            this.undo()
+                            break
+
+                        case 89: // Y
+                            if (!this.ctrlActive) return
+                            this.redo()
+                            break
+                        case 83: // S
+                            if (!this.ctrlActive) return
+                            this.download()
+                            this.ctrlActive = false
+                            break
+                        case 76: // L
+                            if (!this.ctrlActive) return
+                            this.upload()
+                            this.ctrlActive = false
+                            break
+                        case 67: // C
+                            if (!this.ctrlActive) return
+                            if (this.pasteActive) return
+                            this.copy()
+                            break
+
+                        case 86: // V
+                            if (!this.ctrlActive) return
+                            if (this.pasteActive) return
+                            this.pasteActive = true
+                            this.showPasteHover(this.mouseFieldX, this.mouseFieldY)
+                            break
+                        case 88: // X
+                            if (!this.ctrlActive) return
+                            if (this.pasteActive) return
+                            this.cut()
+                            break
+                    }
+                })
+
+            }
+
+            initHistory() {
+                let data = []
+                this.tablicaLogiczna.forEach(fields => {
+                    let row = []
+
+                    fields.forEach(field => {
+                        let obj = {
+                            ix: field.ix,
+                            iy: field.iy
+                        }
+                        row.push(obj)
+                    })
+                    data.push(row)
+                })
+
+                this.historyContent.push(data)
+            }
+
+            updateHistory() {
+                let i = this.indexInHistoryContent
+                if (i != this.historyContent.length - 1) {
+                    this.historyContent.splice(i + 1, this.historyContent.length - i - 1)
+                }
+
+                this.indexInHistoryContent += 1
+                let data = []
+
+                this.historyContent = this.historyContent.slice(0, this.indexInHistoryContent)
+
+                this.tablicaLogiczna.forEach(fields => {
+                    let row = []
+
+                    fields.forEach(field => {
+                        let obj = {
+                            ix: field.ix,
+                            iy: field.iy
+                        }
+                        row.push(obj)
+                    })
+                    data.push(row)
+                })
+
+                this.historyContent.push(data)
+            }
+
+            undo() {
+                if (this.indexInHistoryContent > 0) {
+                    this.indexInHistoryContent -= 1
+                    let i = this.indexInHistoryContent
+
+                    this.loadFromHistory(i)
+                }
+            }
+
+            redo() {
+                if (this.indexInHistoryContent < this.historyContent.length - 1) {
+                    this.indexInHistoryContent += 1
+
+                    let i = this.indexInHistoryContent
+                    this.loadFromHistory(i)
+                }
+            }
+
+            copy() {
+                if (this.selectedFields.length == 0) return
+
+                this.selectedFields
+                    .sort((a, b) => {
+                        if (a.y > b.y) return 1
+                        if (a.y == b.y) return 0
+                        if (a.y < b.y) return -1
+                    })
+
+                let minX = this.selectedFields[0].x
+                let maxX = this.selectedFields[0].x
+
+                let minY = this.selectedFields[0].y
+                let maxY = this.selectedFields[0].y
+
+                this.selectedFields.forEach(field => {
+                    if (field.x > maxX) {
+                        maxX = field.x
+                    }
+
+                    if (field.x < minX) {
+                        minX = field.x
+                    }
+
+                    if (field.y > maxY) {
+                        maxY = field.y
+                    }
+
+                    if (field.y < minY) {
+                        minY = field.y
+                    }
+                })
+
+                let firstField = this.selectedFields[0]
+
+                let i = 0
+                this.copiedFieldsData = []
+
+                for (let y = minY; y <= maxY; y++) {
+                    let row = []
+
+                    for (let x = minX; x <= maxX; x++) {
+                        let field = this.selectedFields[i]
+
+                        if (field.x == x && field.y == y) {
+                            let data = {
+                                ix: field.ix,
+                                iy: field.iy,
+                                show: true
+                            }
+                            i += 1
+                            row.push(data)
+
+                        } else {
+                            let data = {
+                                ix: 0,
+                                iy: 100,
+                                show: false
+                            }
+                            row.push(data)
+                        }
+                    }
+
+                    this.copiedFieldsData.push(row)
+                }
+
+                while (this.selectedFields.length > 0) {
+                    let field = this.selectedFields[0]
+                    field.setFieldUnSelected()
+                }
+            }
+
+
+            cut() {
+                if (this.selectedFields.length == 0) return
+
+                this.selectedFields
+                    .sort((a, b) => {
+                        if (a.y > b.y) return 1
+                        if (a.y == b.y) return 0
+                        if (a.y < b.y) return -1
+                    })
+
+                let minX = this.selectedFields[0].x
+                let maxX = this.selectedFields[0].x
+
+                let minY = this.selectedFields[0].y
+                let maxY = this.selectedFields[0].y
+
+                this.selectedFields.forEach(field => {
+                    if (field.x > maxX) {
+                        maxX = field.x
+                    }
+
+                    if (field.x < minX) {
+                        minX = field.x
+                    }
+
+                    if (field.y > maxY) {
+                        maxY = field.y
+                    }
+
+                    if (field.y < minY) {
+                        minY = field.y
+                    }
+                })
+
+                let firstField = this.selectedFields[0]
+
+                let i = 0
+                this.copiedFieldsData = []
+
+                for (let y = minY; y <= maxY; y++) {
+                    let row = []
+
+                    for (let x = minX; x <= maxX; x++) {
+                        let field = this.selectedFields[i]
+
+                        if (field.x == x && field.y == y) {
+                            let data = {
+                                ix: field.ix,
+                                iy: field.iy,
+                                show: true
+                            }
+                            i += 1
+                            row.push(data)
+
+                        } else {
+                            let data = {
+                                ix: 0,
+                                iy: 100,
+                                show: false
+                            }
+                            row.push(data)
+                        }
+                    }
+
+                    this.copiedFieldsData.push(row)
+                }
+
+                while (this.selectedFields.length > 0) {
+                    let field = this.selectedFields[0]
+                    field.setFieldUnSelected()
+                    field.clearField()
+                }
+            }
+
+
+            paste(fieldX, fieldY) {
+                let x = fieldX
+                let y = fieldY
+
+                this.copiedFieldsData.forEach(row => {
+                    row.forEach(data => {
+                        let field = this.tablicaLogiczna[y][x]
+
+                        if (data.show) {
+                            field.setFieldUnSelected()
+                            field.setImagePositon(data.ix, data.iy)
+                            field.fillField(data.ix, data.iy)
+                        }
+
+                        x += 1
+                    })
+
+                    y += 1
+                    x = fieldX
+                })
+
+                this.updateHistory()
+            }
+
+
+            showPasteHover(fieldX, fieldY) {
+                let x = fieldX
+                let y = fieldY
+
+                this.tablicaLogiczna.forEach(row => {
+                    row.forEach(field => {
+                        field.fillField()
+                        field.setFieldUnSelected()
+                    })
+                })
+
+                this.copiedFieldsData.forEach(row => {
+                    row.forEach(data => {
+                        let field = this.tablicaLogiczna[y][x]
+
+                        if (data.show)
+                            field.fillFieldHover(data.ix, data.iy)
+
+                        x += 1
+                    })
+
+                    y += 1
+                    x = fieldX
+                })
+
+            }
+
+            loadFromHistory(i) {
+                let historyArray = this.historyContent[i]
+
+                this.historyContent[i].forEach((row, y) => {
+                    row.forEach((data, x) => {
+                        let field = this.tablicaLogiczna[y][x]
+
+                        let { ix, iy } = data
+
+                        field.setImagePositon(ix, iy)
+                        field.fillField()
+                    })
+                })
+            }
+
+            download() {
+                let board = this.historyContent[this.indexInHistoryContent]
+                let data = JSON.stringify(board)
+
+                let blob = new Blob([data], { type: "text/javascript" })
+                let url = URL.createObjectURL(blob)
+
+                let a = document.createElement("a")
+                document.body.appendChild(a);
+                a.style = "display: none";
+
+                a.href = url;
+                a.download = "map.js";
+                a.click();
+                URL.revokeObjectURL(url);
+                a.remove()
+            }
+
+            upload() {
+                const inputHtml = document.createElement("input")
+                inputHtml.type = "file"
+                inputHtml.accept = "text/javascript"
+                inputHtml.click()
+
+                inputHtml.addEventListener("change", () => {
+                    if (inputHtml.files[0]) {
+                        let fileReader = new FileReader()
+                        fileReader.readAsText(inputHtml.files[0], "UTF-8")
+                        fileReader.addEventListener("load", (event) => {
+                            let dataString = event.target.result
+
+                            let data = JSON.parse(dataString)
+                            this.historyContent.push(data)
+                            this.indexInHistoryContent += 1
+
+                            this.loadFromHistory(this.indexInHistoryContent)
+                        })
+                    }
+                })
+            }
+
+            createLeftPanelFields() {
                 let sx = 0
                 let sy = 0
                 for (let y = 0; y < 40; y++) {
@@ -236,14 +622,14 @@
                     }
 
                     for (let x = 0; x < 16; x++) {
-                        let square = new Square("spritesheet.png", 25, 25, sx, sy)
-                        let squareHtml = square.getHtml()
-                        this.divItems.appendChild(squareHtml)
+                        let field = new Field(this.image, 25, 25, sx, sy)
+                        let fieldHtml = field.getHtml()
+                        this.divItems.appendChild(fieldHtml)
                         sx += 48
 
 
-                        squareHtml.addEventListener("click", () => {
-
+                        field.getHtml().addEventListener("click", () => {
+                            this.fillFields(field.sx, field.sy)
                         })
 
                     }
@@ -252,90 +638,87 @@
                     this.divItems.appendChild(br)
 
                 }
-                let column = []
+            }
+
+            createRightPanelFields() {
                 for (let y = 0; y < 40; y++) {
-                    column = []
+                    let row = []
                     for (let x = 0; x < 40; x++) {
-                        let emptyField = new EmptyFields(25, 25)
+                        let emptyField = new EmptyField(this.image, 25, 25, x, y, this.selectedFields)
                         let emptyFieldHtml = emptyField.getHtml()
-                        column.push(emptyFieldHtml)
+
+                        row.push(emptyField)
                         this.emptyFields.appendChild(emptyFieldHtml)
+
+                        emptyField.getHtml().addEventListener("click", (e) => {
+
+                            if (this.pasteActive) {
+                                this.paste(x, y)
+                                this.pasteActive = false
+                                return
+                            }
+
+                            if (!this.ctrlActive) {
+                                this.clearSelectionFields()
+                            }
+
+                            emptyField.setFieldSelected()
+                        })
                     }
-                    this.tablicaLogiczna.push(column)
+
+                    this.tablicaLogiczna.push(row)
                     let br = document.createElement("br")
                     this.emptyFields.appendChild(br)
                 }
+
             }
 
-            fillFields() {
-                this.img.addEventListener("load", () => {
-                    this.ctx.drawImage(this.img, this.sx, this.sy, 48, 48, 0, 0, this.width, this.height)
-                })
-                this.canvas.addEventListener("mouseover", () => {
-                    this.canvas.style.border = "1px solid red"
-                    this.canvas.style.cursor = "pointer"
-                    this.canvas.style.filter = "brightness(100%)"
-                })
-                this.canvas.addEventListener("mouseout", () => {
-                    this.canvas.style = ""
-                })
-                this.canvas.addEventListener("click", () => {
-                    // sx = this.sx
-                    // sy = this.sy
-                    let selected = document.querySelectorAll(".selected")
-                    if (selected.length != 0) {
-                        for (let i = 0; i < selected.length; i++) {
-                            selected[i].getContext('2d').drawImage(this.img, this.sx, this.sy, 48, 48, 0, 0, 25, 25)
-                        }
-                    } else {
-                        selected[0].getContext("2d").drawImage(this.img, this.sx, this.sy, 48, 48, 0, 0, 25, 25)
-                    }
-
-                    let automat = document.querySelector(".map input")
-
-                    if (automat.checked == true) {
-                        for (let y in this.tablicaLogiczna) {
-                            for (let x in this.tablicaLogiczna[y]) {
-                                if (this.tablicaLogiczna[y][x].classList.contains('selected') == true) {
-                                    if (x < 39) {
-                                        this.tablicaLogiczna[y][x].classList.remove('selected')
-                                        this.tablicaLogiczna[y][Number(x) + 1].classList.add('selected')
-                                        console.log(this.tablicaLogiczna[y][x])
-                                        return
-                                    } else {
-                                        this.tablicaLogiczna[y][39].classList.remove('selected')
-                                        x = 0
-                                        y = Number(y) + 1
-                                        this.tablicaLogiczna[y][x].classList.add('selected')
-                                        return
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-
-                    imgData = this.img, this.sx, this.sy, 48, 48, 0, 0, this.width, this.height
-                })
+            clearSelectionFields() {
+                let l = this.selectedFields.length - 1
+                while (l >= 0) {
+                    this.selectedFields[0].setFieldUnSelected()
+                    l -= 1
+                }
             }
 
-
-            addAutomatClick() {
-                this.automat.addEventListener('click', () => {
-                    if (this.automat.checked == true) {
-                        console.log('automat włączony')
-                    } else if (this.automat.checked == false) {
-                        console.log('automat wyłączony')
-                    } else {
-                        console.log('automat nie działa')
-                    }
+            fillFields(x, y) {
+                this.selectedFields.forEach(field => {
+                    field.ix = x
+                    field.iy = y
+                    field.fillField()
                 })
+
+                this.updateHistory()
+
+                if (!this.automat.checked) {
+                    this.clearSelectionFields()
+                    return
+                }
+
+                let i = this.selectedFields.length - 1
+                let lastField = this.selectedFields[i]
+
+                let fx = lastField.x + 1
+                let fy = lastField.y
+
+                if (fx > 39) {
+                    fx = 0
+                    fy += 1
+                }
+
+                let nextField = this.tablicaLogiczna[fy][fx]
+                this.clearSelectionFields()
+
+                nextField.setFieldSelected()
             }
 
             addSelectFieldsListeners() {
                 let pagePosX, pagePosY, clientPosX, clientPosY
 
                 window.addEventListener('mousedown', (e) => {
+
+                    if (!e.target.classList.contains("empty_fields")) return
+
                     pagePosX = e.pageX
                     pagePosY = e.pageY
 
@@ -353,7 +736,35 @@
                 })
 
                 window.addEventListener("mousemove", (e) => {
+                    e.preventDefault()
+
+                    if (this.pasteActive) {
+
+                        if (!e.target.classList.contains("empty_fields")) return
+
+
+
+                        let x = parseInt(e.target.id.split("_")[0])
+                        let y = parseInt(e.target.id.split("_")[1])
+
+                        let field = this.tablicaLogiczna[y][x]
+                        console.log(x + " - " + y)
+
+                        this.showPasteHover(x, y)
+                        return
+                    }
+
+                    if (e.target.classList.contains("empty_fields")) {
+                        let x = parseInt(e.target.id.split("_")[0])
+                        let y = parseInt(e.target.id.split("_")[1])
+
+                        this.mouseFieldX = x
+                        this.mouseFieldY = y
+                    }
+
                     if (this.createBlockActive == false) return
+
+
 
                     this.selectionBlock.style.left = pagePosX + "px"
                     this.selectionBlock.style.top = pagePosY + "px"
@@ -367,14 +778,17 @@
 
                             for (let y in this.tablicaLogiczna) {
                                 for (let x in this.tablicaLogiczna[y]) {
-                                    let box = this.tablicaLogiczna[y][x]
-                                    let boxX = box.getBoundingClientRect().x
-                                    let boxY = box.getBoundingClientRect().y
-                                    box.classList.remove("selected")
+                                    let field = this.tablicaLogiczna[y][x]
+                                    let fieldXHtml = field.getHtml().getBoundingClientRect().x
+                                    let fieldYHtml = field.getHtml().getBoundingClientRect().y
+
+                                    if (!this.ctrlActive) {
+                                        field.setFieldUnSelected()
+                                    }
 
 
-                                    if (boxX + 25 > clientPosX && boxX < e.clientX && boxY + 25 > clientPosY && boxY < e.clientY) {
-                                        box.classList.add("selected")
+                                    if (fieldXHtml + 25 > clientPosX && fieldXHtml < e.clientX && fieldYHtml + 25 > clientPosY && fieldYHtml < e.clientY) {
+                                        field.setFieldSelected()
                                     }
                                 }
                             }
@@ -385,14 +799,16 @@
 
                             for (let y in this.tablicaLogiczna) {
                                 for (let x in this.tablicaLogiczna[y]) {
-                                    let box = this.tablicaLogiczna[y][x]
-                                    let boxX = box.getBoundingClientRect().x
-                                    let boxY = box.getBoundingClientRect().y
-                                    box.classList.remove("selected")
+                                    let field = this.tablicaLogiczna[y][x]
+                                    let fieldXHtml = field.getHtml().getBoundingClientRect().x
+                                    let fieldYHtml = field.getHtml().getBoundingClientRect().y
 
+                                    if (!this.ctrlActive) {
+                                        field.setFieldUnSelected()
+                                    }
 
-                                    if (boxX + 25 > clientPosX && boxX < e.clientX && boxY < clientPosY && boxY > e.clientY - 25) {
-                                        box.classList.add("selected")
+                                    if (fieldXHtml + 25 > clientPosX && fieldXHtml < e.clientX && fieldYHtml < clientPosY && fieldYHtml > e.clientY - 25) {
+                                        field.setFieldSelected()
                                     }
 
                                 }
@@ -408,14 +824,16 @@
 
                             for (let y in this.tablicaLogiczna) {
                                 for (let x in this.tablicaLogiczna[y]) {
-                                    let box = this.tablicaLogiczna[y][x]
-                                    let boxX = box.getBoundingClientRect().x
-                                    let boxY = box.getBoundingClientRect().y
-                                    box.classList.remove("selected")
+                                    let field = this.tablicaLogiczna[y][x]
+                                    let fieldXHtml = field.getHtml().getBoundingClientRect().x
+                                    let fieldYHtml = field.getHtml().getBoundingClientRect().y
 
+                                    if (!this.ctrlActive) {
+                                        field.setFieldUnSelected()
+                                    }
 
-                                    if (boxX < clientPosX && boxX > e.clientX - 25 && boxY + 25 > clientPosY && boxY < e.clientY) {
-                                        box.classList.add("selected")
+                                    if (fieldXHtml < clientPosX && fieldXHtml > e.clientX - 25 && fieldYHtml + 25 > clientPosY && fieldYHtml < e.clientY) {
+                                        field.setFieldSelected()
                                     }
                                 }
                             }
@@ -427,14 +845,16 @@
 
                             for (let y in this.tablicaLogiczna) {
                                 for (let x in this.tablicaLogiczna[y]) {
-                                    let box = this.tablicaLogiczna[y][x]
-                                    let boxX = box.getBoundingClientRect().x
-                                    let boxY = box.getBoundingClientRect().y
-                                    box.classList.remove("selected")
+                                    let field = this.tablicaLogiczna[y][x]
+                                    let fieldXHtml = field.getHtml().getBoundingClientRect().x
+                                    let fieldYHtml = field.getHtml().getBoundingClientRect().y
 
+                                    if (!this.ctrlActive) {
+                                        field.setFieldUnSelected()
+                                    }
 
-                                    if (boxX < clientPosX && boxX > e.clientX - 25 && boxY < clientPosY && boxY > e.clientY - 25) {
-                                        box.classList.add("selected")
+                                    if (fieldXHtml < clientPosX && fieldXHtml > e.clientX - 25 && fieldYHtml < clientPosY && fieldYHtml > e.clientY - 25) {
+                                        field.setFieldSelected()
                                     }
                                 }
                             }
@@ -448,399 +868,81 @@
 
                     this.createBlockActive = true
                 })
+
                 window.addEventListener('mouseup', (e) => {
                     this.selectionBlock.style.display = 'none'
                     this.createBlockActive = false
                 })
 
-
             }
 
             addMenuListeners() {
+
                 window.addEventListener('contextmenu', (e) => {
                     e.preventDefault()
                     this.menu.style.display = "block"
                     this.menu.style.top = e.clientY + "px"
                     this.menu.style.left = e.clientX + "px"
-                    console.log(menu)
+                })
+
+
+                const trUndo = document.querySelector("#tr_undo")
+                trUndo.addEventListener("click", () => {
+                    this.undo()
+                })
+
+                const trRedo = document.querySelector("#tr_redo")
+                trRedo.addEventListener("click", () => {
+                    this.redo()
+                })
+
+                const trSave = document.querySelector("#tr_save")
+                trSave.addEventListener("click", () => {
+                    this.download()
+                })
+
+                const trLoad = document.querySelector("#tr_load")
+                trLoad.addEventListener("click", () => {
+                    this.upload()
+                })
+
+                const trCopy = document.querySelector("#tr_copy")
+                trCopy.addEventListener("click", () => {
+
+                })
+
+                const trCut = document.querySelector("#tr_cut")
+                trCut.addEventListener("click", () => {
+                    this.cut()
+                })
+
+                const trPaste = document.querySelector("#tr_paste")
+                trPaste.addEventListener("click", () => {
+                    this.pasteActive = true
+                    this.showPasteHover(this.mouseFieldX, this.mouseFieldY)
                 })
 
 
                 window.addEventListener('click', (e) => {
-                    // console.log(menu)
                     this.menu.style.display = "none"
                 })
             }
 
-
-            addKeyListeners() {
-                //##WINDOWS
-                if (navigator.userAgent.includes('Windows')) {
-                    document.body.addEventListener("keyup", (e) => {
-                        switch (e.keyCode) {
-                            case 17: // CTRL
-                                console.log('ctrl dziala')
-                                this.ctrlActive = false
-                                break
-                        }
-                    })
-                    document.body.addEventListener("keydown", (e) => {
-                        switch (e.keyCode) {
-                            case 17: //17 CTRL || 93 meta
-
-                                this.ctrlActive = true
-                                console.log(ctrlActive)
-                                break
-                        }
-                    })
-                }
-
-
-                //##MACINTOSH
-                if (navigator.userAgent.includes('Macintosh')) {
-                    document.body.addEventListener("keydown", (e) => {
-                        switch (e.keyCode) {
-                            case 93: //17 CTRL || 93 meta
-                                ctrlActive = true
-                                break
-                        }
-                    })
-                    document.body.addEventListener("keyup", (e) => {
-                        switch (e.keyCode) {
-                            case 93: //17 CTRL || 93 meta
-                                ctrlActive = false
-                                break
-                        }
-                    })
-                }
-
-                window.addEventListener("keydown", e => {
-                    switch (e.keyCode) {
-                        case 46: //delete
-                            this.deleteSelectedFields()
-                            break
-
-                        case 17: //ctrl
-
-                            break
-                    }
-
-                })
-            }
-
             deleteSelectedFields() {
-                let selected = document.querySelectorAll(".selected")
-                let img = new Image()
-                img.src = "spritesheet.png"
-                img.addEventListener("load", () => {
-                    for (let i = 0; i < selected.length; i++) {
-                        let oneSelected = selected[i]
-                        oneSelected.getContext('2d').drawImage(img, 22, 100, 48, 48, 0,
-                            0, 48, 48)
-                    }
+                this.selectedFields.forEach(field => {
+                    field.clearField()
                 })
+                this.clearSelectionFields()
             }
 
         }
+
 
 
         window.addEventListener("DOMContentLoaded", () => {
             let game = new Game()
         })
 
-
-
-
-        // let imgData, //obrazek do kopiowania(podany z parametrami do wyciecia)
-        //     sx, //pozycja do wyciecia => x
-        //     sy, //pozycja do wyciecia => y
-        //     selected, //zaznaczone elementy pustych pol
-        //     ctrlActive = false, //czy ctrl jest aktywny
-        //     createBlockActive = false, //czy rysowanie blocku jest aktywne
-        //     automat = document.querySelector('input'), //automat
-        //     posX,
-        //     posY,
-        //     currentPosX,
-        //     currentPosY,
-
-
-        //     menu = document.getElementById('menu'), //menu po kliknieciu prawym myszki
-        //     selectionBlock = document.getElementById('selectionBlock'),
-        //     divItems = document.getElementById("items"), //miejsce do przetrzymywania obrazkow =>lewa strona
-        //     emptyFields = document.getElementById("empty_fields"), //miejsce dla pustych pol => prawa strona
-        //     tablicaLogiczna = [] //=>tablica przetrzymuje pozycje wszystkich pustych pol
-
-
-
-        // window.addEventListener("DOMContentLoaded", (e) => {
-        //     //##TWORZENIE PÓL
-        //     let sx = 0
-        //     let sy = 0
-        //     for (let y = 0; y < 40; y++) {
-        //         if (y < 20) {
-        //             sx = 0
-        //         } else {
-        //             sx = 768
-        //         }
-
-        //         if (y == 20) {
-        //             sy = 0
-        //         }
-
-        //         for (let x = 0; x < 16; x++) {
-        //             let square = new Square("spritesheet.png", 25, 25, sx, sy)
-        //             let squareHtml = square.getHtml()
-        //             divItems.appendChild(squareHtml)
-        //             sx += 48
-        //         }
-        //         sy += 48
-        //         let br = document.createElement("br")
-        //         divItems.appendChild(br)
-
-        //     }
-        //     let column = []
-        //     for (let y = 0; y < 40; y++) {
-        //         column = []
-        //         for (let x = 0; x < 40; x++) {
-        //             let emptyField = new EmptyFields(25, 25)
-        //             let emptyFieldHtml = emptyField.getHtml()
-        //             column.push(emptyFieldHtml)
-        //             emptyFields.appendChild(emptyFieldHtml)
-        //         }
-        //         tablicaLogiczna.push(column)
-        //         let br = document.createElement("br")
-        //         emptyFields.appendChild(br)
-
-        //     }
-        //     //##KONIEC TWORZENIA PÓL
-
-        //     //##WINDOWS
-        //     if (navigator.userAgent.includes('Windows')) {
-        //         document.body.addEventListener("keyup", (e) => {
-        //             switch (e.keyCode) {
-        //                 case 17: // CTRL
-        //                     console.log('ctrl dziala')
-        //                     ctrlActive = false
-        //                     break
-        //             }
-        //         })
-        //         document.body.addEventListener("keydown", (e) => {
-        //             switch (e.keyCode) {
-        //                 case 17: //17 CTRL || 93 meta
-
-        //                     ctrlActive = true
-        //                     console.log(ctrlActive)
-        //                     break
-        //             }
-        //         })
-        //     }
-        //     //##KONIEC WINDOWSA
-
-        //     //##MACINTOSH
-        //     if (navigator.userAgent.includes('Macintosh')) {
-        //         document.body.addEventListener("keydown", (e) => {
-        //             switch (e.keyCode) {
-        //                 case 93: //17 CTRL || 93 meta
-        //                     ctrlActive = true
-        //                     break
-        //             }
-        //         })
-        //         document.body.addEventListener("keyup", (e) => {
-        //             switch (e.keyCode) {
-        //                 case 93: //17 CTRL || 93 meta
-        //                     ctrlActive = false
-        //                     break
-        //             }
-        //         })
-        //     }
-        //     //##KONIEC MACINTOSHA
-
-        //     //%% FUNKCJE %%
-
-        //     //##KOPIOWANIE
-        //     document.body.addEventListener("keydown", (e) => {
-        //         console.log(e.key, e.keyCode);
-        //         if (ctrlActive && e.keyCode == 67) {
-        //             // for (let i = 0; i < selected.length; i++) {
-        //             //     let oneSelected = selected[i]
-        //             // }
-        //             console.log('kopiowanie dziala')
-        //         }
-        //         //##KONIEC KOPIOWANIA
-        //     })
-
-        //     //##USUWANIE
-        //     document.body.addEventListener("keydown", (e) => {
-        //         switch (e.keyCode) {
-        //             case 46: //delete
-        //                 console.log("działa deleted przycisk")
-        //                 let img = new Image()
-        //                 img.src = "spritesheet.png"
-        //                 img.addEventListener("load", () => {
-        //                     for (let i = 0; i < selected.length; i++) {
-        //                         let oneSelected = selected[i]
-        //                         oneSelected.getContext('2d').drawImage(img, 22, 100, 48, 48, 0,
-        //                             0, 48, 48)
-        //                     }
-        //                 })
-        //                 break
-        //         }
-        //     })
-        //     //##KONIEC USUWANIA
-
-
-        //     //##MENU
-        //     window.addEventListener('contextmenu', (e) => {
-        //         e.preventDefault()
-        //         let menu = document.getElementById('menu')
-        //         menu.style.display = "block"
-        //         menu.style.top = e.clientY + "px"
-        //         menu.style.left = e.clientX + "px"
-        //         console.log(menu)
-        //     })
-
-        //     window.addEventListener('click', (e) => {
-        //         // console.log(menu)
-        //         menu.style.display = "none"
-        //     })
-        //     //##KONIEC MENU
-
-        //     // ##AUTOMAT
-        //     automat.addEventListener('click', () => {
-        //         if (automat.checked == true) {
-        //             console.log('automat włączony')
-        //         } else if (automat.checked == false) {
-        //             console.log('automat wyłączony')
-        //         } else {
-        //             console.log('automat nie działa')
-        //         }
-        //     })
-
-        //     //##KONIEC AUTOMATU
-
-
-        //     //##SELECTION_BLOCK             //blok do zaznaczania
-        //     window.addEventListener('mousedown', (e) => {
-        //         pagePosX = e.pageX
-        //         pagePosY = e.pageY
-
-        //         clientPosX = e.clientX
-        //         clientPosY = e.clientY
-        //         selectionBlock.style.display = "block"
-
-        //         selectionBlock.style.width = 0
-        //         selectionBlock.style.height = 0
-
-        //         selectionBlock.style.left = pagePosX + "px"
-        //         selectionBlock.style.top = pagePosY + "px"
-        //         createBlockActive = true
-
-        //     })
-
-        //     window.addEventListener("mousemove", (e) => {
-        //         if (createBlockActive == false) return
-
-        //         selectionBlock.style.left = pagePosX + "px"
-        //         selectionBlock.style.top = pagePosY + "px"
-
-        //         let selectionBlockWidth, selectionBlockHeight
-        //         if (e.pageX > pagePosX) {
-        //             if (e.pageY > pagePosY) {
-        //                 selectionBlockWidth = e.pageX - pagePosX
-        //                 selectionBlockHeight = e.pageY - pagePosY
-
-        //                 for (let y in tablicaLogiczna) {
-        //                     for (let x in tablicaLogiczna[y]) {
-        //                         let box = tablicaLogiczna[y][x]
-        //                         let boxX = box.getBoundingClientRect().x
-        //                         let boxY = box.getBoundingClientRect().y
-        //                         box.classList.remove("selected")
-
-
-        //                         if (boxX + 25 > clientPosX && boxX < e.clientX && boxY + 25 > clientPosY && boxY < e.clientY) {
-        //                             box.classList.add("selected")
-        //                         }
-        //                     }
-        //                 }
-        //             } else {
-        //                 selectionBlockWidth = e.pageX - pagePosX
-        //                 selectionBlockHeight = pagePosY - e.pageY
-        //                 selectionBlock.style.top = pagePosY - selectionBlockHeight + "px"
-
-        //                 for (let y in tablicaLogiczna) {
-        //                     for (let x in tablicaLogiczna[y]) {
-        //                         let box = tablicaLogiczna[y][x]
-        //                         let boxX = box.getBoundingClientRect().x
-        //                         let boxY = box.getBoundingClientRect().y
-        //                         box.classList.remove("selected")
-
-
-        //                         if (boxX + 25 > clientPosX && boxX < e.clientX && boxY < clientPosY && boxY > e.clientY - 25) {
-        //                             box.classList.add("selected")
-        //                         }
-
-        //                     }
-        //                 }
-        //             }
-        //         }
-
-        //         if (e.pageX < pagePosX) {
-        //             if (e.pageY > pagePosY) {
-        //                 selectionBlockWidth = pagePosX - e.pageX
-        //                 selectionBlockHeight = e.pageY - pagePosY
-        //                 selectionBlock.style.left = pagePosX - selectionBlockWidth + "px"
-
-        //                 for (let y in tablicaLogiczna) {
-        //                     for (let x in tablicaLogiczna[y]) {
-        //                         let box = tablicaLogiczna[y][x]
-        //                         let boxX = box.getBoundingClientRect().x
-        //                         let boxY = box.getBoundingClientRect().y
-        //                         box.classList.remove("selected")
-
-
-        //                         if (boxX < clientPosX && boxX > e.clientX - 25 && boxY + 25 > clientPosY && boxY < e.clientY) {
-        //                             box.classList.add("selected")
-        //                         }
-        //                     }
-        //                 }
-        //             } else {
-        //                 selectionBlockWidth = pagePosX - e.pageX
-        //                 selectionBlockHeight = pagePosY - e.pageY
-        //                 selectionBlock.style.left = pagePosX - selectionBlockWidth + "px"
-        //                 selectionBlock.style.top = pagePosY - selectionBlockHeight + "px"
-
-        //                 for (let y in tablicaLogiczna) {
-        //                     for (let x in tablicaLogiczna[y]) {
-        //                         let box = tablicaLogiczna[y][x]
-        //                         let boxX = box.getBoundingClientRect().x
-        //                         let boxY = box.getBoundingClientRect().y
-        //                         box.classList.remove("selected")
-
-
-        //                         if (boxX < clientPosX && boxX > e.clientX - 25 && boxY < clientPosY && boxY > e.clientY - 25) {
-        //                             box.classList.add("selected")
-        //                         }
-        //                     }
-        //                 }
-        //             }
-
-        //         }
-
-
-        //         selectionBlock.style.width = selectionBlockWidth + 'px' //abs => modul
-        //         selectionBlock.style.height = selectionBlockHeight + 'px'
-
-        //         createBlockActive = true
-        //     })
-        //     window.addEventListener('mouseup', (e) => {
-        //         selectionBlock.style.display = 'none'
-        //         createBlockActive = false
-        //     })
-
-
-        //     //##KONIEC SELECTION_BLOCK
-
-        // })
 
 
         /*spritesheet wymiary*/
