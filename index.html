@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+
+    <div class="row">
+        <div>
+            <p class="title">Items😃</p>
+            <div id="items">
+
+            </div>
+        </div>
+        <div>
+            <p class="map">Map(automat:<input type="checkbox">)</p>
+            <div id="empty_fields">
+                <div id="menu">
+                    <table>
+                        <tr>
+                            <td>Undo <span>Ctrl+Z</span></td>
+                        </tr>
+                        <tr>
+                            <td>Redo<span>Ctrl+Y</span></td>
+                        </tr>
+                        <tr>
+                            <td>Cut<span>Ctrl+X</span></td>
+                        </tr>
+                        <tr>
+                            <td>Copy<span>Ctrl+C</span></td>
+                        </tr>
+                        <tr>
+                            <td>Past<span>Ctrl+V</span></td>
+                        </tr>
+                        <tr>
+                            <td>Delete<span>Del</span></td>
+                        </tr>
+                        <tr>
+                            <td>Save to file<span>Ctrl+S</span></td>
+                        </tr>
+                        <tr>
+                            <td>Load data from file<span>Ctrl+L</span></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="selectionBlock"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class Square {
+            constructor(src, width, height, sx, sy) {
+                this.src = src
+                this.width = width
+                this.height = height
+                this.canvas = document.createElement("canvas")
+                this.sx = sx
+                this.sy = sy
+
+                this.canvas.width = width
+                this.canvas.height = height
+                this.ctx = this.canvas.getContext("2d")
+                this.img = new Image()
+                this.img.src = src
+                this.canvas.classList.add("border")
+
+                this.init()
+            }
+
+            // init() {
+            //     this.img.addEventListener("load", () => {
+            //         this.ctx.drawImage(this.img, this.sx, this.sy, 48, 48, 0, 0, this.width, this.height)
+            //     })
+            //     this.canvas.addEventListener("mouseover", () => {
+            //         this.canvas.style.border = "1px solid red"
+            //         this.canvas.style.cursor = "pointer"
+            //         this.canvas.style.filter = "brightness(100%)"
+            //     })
+            //     this.canvas.addEventListener("mouseout", () => {
+            //         this.canvas.style = ""
+            //     })
+            //     this.canvas.addEventListener("click", () => {
+            //         // sx = this.sx
+            //         // sy = this.sy
+            //         let selected = document.querySelectorAll(".selected")
+            //         if (selected.length != 0) {
+            //             for (let i = 0; i < selected.length; i++) {
+            //                 selected[i].getContext('2d').drawImage(this.img, this.sx, this.sy, 48, 48, 0, 0, 25, 25)
+            //             }
+            //         } else {
+            //             selected[0].getContext("2d").drawImage(this.img, this.sx, this.sy, 48, 48, 0, 0, 25, 25)
+            //         }
+
+            //         let automat = document.querySelector(".map input")
+
+            //         if (automat.checked == true) {
+            //             for (let y in this.tablicaLogiczna) {
+            //                 for (let x in this.tablicaLogiczna[y]) {
+            //                     if (this.tablicaLogiczna[y][x].classList.contains('selected') == true) {
+            //                         if (x < 39) {
+            //                             this.tablicaLogiczna[y][x].classList.remove('selected')
+            //                             this.tablicaLogiczna[y][Number(x) + 1].classList.add('selected')
+            //                             console.log(this.tablicaLogiczna[y][x])
+            //                             return
+            //                         } else {
+            //                             this.tablicaLogiczna[y][39].classList.remove('selected')
+            //                             x = 0
+            //                             y = Number(y) + 1
+            //                             this.tablicaLogiczna[y][x].classList.add('selected')
+            //                             return
+            //                         }
+            //                     }
+            //                 }
+            //             }
+            //         }
+
+
+            //         imgData = this.img, this.sx, this.sy, 48, 48, 0, 0, this.width, this.height
+            //     })
+
+            // }
+            getHtml() {
+                return this.canvas
+            }
+        }
+
+
+        /*klasa puste pola*/
+        class EmptyFields {
+            constructor(width, height) {
+                this.width = width
+                this.height = height
+                this.canvas = document.createElement("canvas")
+                this.ctx = this.canvas.getContext("2d")
+
+                this.canvas.classList.add("empty_fields")
+                this.canvas.width = width
+                this.canvas.height = height
+
+                this.img = new Image()
+                this.img.src = "spritesheet.png"
+
+                this.init()
+            }
+            init() {
+                let flaga = false;
+                let doubleClick = false
+                let number = 0
+                this.ctx.rect(27, 27, this.width, this.height)
+                // this.square = ctx2.rect()       
+                this.canvas.addEventListener("mouseover", () => {
+                    // this.canvas.style.border = "1px dashed red"
+                    this.canvas.style.cursor = "pointer"
+                })
+                this.canvas.addEventListener("mouseout", () => {
+                    if (flaga == false) {
+                        this.canvas.style = ""
+                    }
+                })
+                this.img.addEventListener("load", () => {
+                    this.canvas.addEventListener("click", () => {
+                        let selected = document.getElementsByClassName("selected");
+                        for (let i = selected.length - 1; i >= 0; i--) { //pętla od tyłu w celu usunięcia wszystkich selected
+                            if (ctrlActive == false) {
+                                selected[i].classList.remove("selected")
+                            }
+                        }
+                        this.canvas.classList.add("selected")
+                        number += 1
+                        flaga = true
+
+                        if ((number % 2 == false)) {
+                            this.canvas.style = ""
+                        }
+                    })
+                })
+            }
+            getHtml() {
+                return this.canvas
+            }
+        }
+
+
+        class Game {
+            imgData //obrazek do kopiowania(podany z parametrami do wyciecia)
+            // sx //pozycja do wyciecia => x
+            // sy //pozycja do wyciecia => y
+            selected //zaznaczone elementy pustych pol
+            posX
+            posY
+            currentPosX
+            currentPos
+
+            constructor() {
+                this.ctrlActive = false //czy ctrl jest aktywny
+                this.createBlockActive = false //czy rysowanie blocku jest aktywne
+                this.automat = document.querySelector('input') //automat
+
+                this.menu = document.getElementById('menu') //menu po kliknieciu prawym myszki
+                this.selectionBlock = document.getElementById('selectionBlock')
+                this.divItems = document.getElementById("items") //miejsce do przetrzymywania obrazkow =>lewa strona
+                this.emptyFields = document.getElementById("empty_fields") //miejsce dla pustych pol => prawa strona
+                this.tablicaLogiczna = [] //=>tablica przetrzymuje pozycje wszystkich pustych pol
+
+                this.init()
+            }
+
+            init() {
+                this.createFields()
+                this.addAutomatClick()
+                this.addKeyListeners()
+                this.addSelectFieldsListeners()
+                this.addMenuListeners()
+            }
+
+            createFields() {
+                let sx = 0
+                let sy = 0
+                for (let y = 0; y < 40; y++) {
+                    if (y < 20) {
+                        sx = 0
+                    } else {
+                        sx = 768
+                    }
+
+                    if (y == 20) {
+                        sy = 0
+                    }
+
+                    for (let x = 0; x < 16; x++) {
+                        let square = new Square("spritesheet.png", 25, 25, sx, sy)
+                        let squareHtml = square.getHtml()
+                        this.divItems.appendChild(squareHtml)
+                        sx += 48
+
+
+                        squareHtml.addEventListener("click", () => {
+
+                        })
+
+                    }
+                    sy += 48
+                    let br = document.createElement("br")
+                    this.divItems.appendChild(br)
+
+                }
+                let column = []
+                for (let y = 0; y < 40; y++) {
+                    column = []
+                    for (let x = 0; x < 40; x++) {
+                        let emptyField = new EmptyFields(25, 25)
+                        let emptyFieldHtml = emptyField.getHtml()
+                        column.push(emptyFieldHtml)
+                        this.emptyFields.appendChild(emptyFieldHtml)
+                    }
+                    this.tablicaLogiczna.push(column)
+                    let br = document.createElement("br")
+                    this.emptyFields.appendChild(br)
+                }
+            }
+
+            fillFields() {
+                this.img.addEventListener("load", () => {
+                    this.ctx.drawImage(this.img, this.sx, this.sy, 48, 48, 0, 0, this.width, this.height)
+                })
+                this.canvas.addEventListener("mouseover", () => {
+                    this.canvas.style.border = "1px solid red"
+                    this.canvas.style.cursor = "pointer"
+                    this.canvas.style.filter = "brightness(100%)"
+                })
+                this.canvas.addEventListener("mouseout", () => {
+                    this.canvas.style = ""
+                })
+                this.canvas.addEventListener("click", () => {
+                    // sx = this.sx
+                    // sy = this.sy
+                    let selected = document.querySelectorAll(".selected")
+                    if (selected.length != 0) {
+                        for (let i = 0; i < selected.length; i++) {
+                            selected[i].getContext('2d').drawImage(this.img, this.sx, this.sy, 48, 48, 0, 0, 25, 25)
+                        }
+                    } else {
+                        selected[0].getContext("2d").drawImage(this.img, this.sx, this.sy, 48, 48, 0, 0, 25, 25)
+                    }
+
+                    let automat = document.querySelector(".map input")
+
+                    if (automat.checked == true) {
+                        for (let y in this.tablicaLogiczna) {
+                            for (let x in this.tablicaLogiczna[y]) {
+                                if (this.tablicaLogiczna[y][x].classList.contains('selected') == true) {
+                                    if (x < 39) {
+                                        this.tablicaLogiczna[y][x].classList.remove('selected')
+                                        this.tablicaLogiczna[y][Number(x) + 1].classList.add('selected')
+                                        console.log(this.tablicaLogiczna[y][x])
+                                        return
+                                    } else {
+                                        this.tablicaLogiczna[y][39].classList.remove('selected')
+                                        x = 0
+                                        y = Number(y) + 1
+                                        this.tablicaLogiczna[y][x].classList.add('selected')
+                                        return
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+                    imgData = this.img, this.sx, this.sy, 48, 48, 0, 0, this.width, this.height
+                })
+            }
+
+
+            addAutomatClick() {
+                this.automat.addEventListener('click', () => {
+                    if (this.automat.checked == true) {
+                        console.log('automat włączony')
+                    } else if (this.automat.checked == false) {
+                        console.log('automat wyłączony')
+                    } else {
+                        console.log('automat nie działa')
+                    }
+                })
+            }
+
+            addSelectFieldsListeners() {
+                let pagePosX, pagePosY, clientPosX, clientPosY
+
+                window.addEventListener('mousedown', (e) => {
+                    pagePosX = e.pageX
+                    pagePosY = e.pageY
+
+                    clientPosX = e.clientX
+                    clientPosY = e.clientY
+                    this.selectionBlock.style.display = "block"
+
+                    this.selectionBlock.style.width = 0
+                    this.selectionBlock.style.height = 0
+
+                    this.selectionBlock.style.left = pagePosX + "px"
+                    this.selectionBlock.style.top = pagePosY + "px"
+                    this.createBlockActive = true
+
+                })
+
+                window.addEventListener("mousemove", (e) => {
+                    if (this.createBlockActive == false) return
+
+                    this.selectionBlock.style.left = pagePosX + "px"
+                    this.selectionBlock.style.top = pagePosY + "px"
+
+                    let selectionBlockWidth, selectionBlockHeight
+
+                    if (e.pageX > pagePosX) {
+                        if (e.pageY > pagePosY) {
+                            selectionBlockWidth = e.pageX - pagePosX
+                            selectionBlockHeight = e.pageY - pagePosY
+
+                            for (let y in this.tablicaLogiczna) {
+                                for (let x in this.tablicaLogiczna[y]) {
+                                    let box = this.tablicaLogiczna[y][x]
+                                    let boxX = box.getBoundingClientRect().x
+                                    let boxY = box.getBoundingClientRect().y
+                                    box.classList.remove("selected")
+
+
+                                    if (boxX + 25 > clientPosX && boxX < e.clientX && boxY + 25 > clientPosY && boxY < e.clientY) {
+                                        box.classList.add("selected")
+                                    }
+                                }
+                            }
+                        } else {
+                            selectionBlockWidth = e.pageX - pagePosX
+                            selectionBlockHeight = pagePosY - e.pageY
+                            this.selectionBlock.style.top = pagePosY - selectionBlockHeight + "px"
+
+                            for (let y in this.tablicaLogiczna) {
+                                for (let x in this.tablicaLogiczna[y]) {
+                                    let box = this.tablicaLogiczna[y][x]
+                                    let boxX = box.getBoundingClientRect().x
+                                    let boxY = box.getBoundingClientRect().y
+                                    box.classList.remove("selected")
+
+
+                                    if (boxX + 25 > clientPosX && boxX < e.clientX && boxY < clientPosY && boxY > e.clientY - 25) {
+                                        box.classList.add("selected")
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
+                    if (e.pageX < pagePosX) {
+                        if (e.pageY > pagePosY) {
+                            selectionBlockWidth = pagePosX - e.pageX
+                            selectionBlockHeight = e.pageY - pagePosY
+                            this.selectionBlock.style.left = pagePosX - selectionBlockWidth + "px"
+
+                            for (let y in this.tablicaLogiczna) {
+                                for (let x in this.tablicaLogiczna[y]) {
+                                    let box = this.tablicaLogiczna[y][x]
+                                    let boxX = box.getBoundingClientRect().x
+                                    let boxY = box.getBoundingClientRect().y
+                                    box.classList.remove("selected")
+
+
+                                    if (boxX < clientPosX && boxX > e.clientX - 25 && boxY + 25 > clientPosY && boxY < e.clientY) {
+                                        box.classList.add("selected")
+                                    }
+                                }
+                            }
+                        } else {
+                            selectionBlockWidth = pagePosX - e.pageX
+                            selectionBlockHeight = pagePosY - e.pageY
+                            selectionBlock.style.left = pagePosX - selectionBlockWidth + "px"
+                            this.selectionBlock.style.top = pagePosY - selectionBlockHeight + "px"
+
+                            for (let y in this.tablicaLogiczna) {
+                                for (let x in this.tablicaLogiczna[y]) {
+                                    let box = this.tablicaLogiczna[y][x]
+                                    let boxX = box.getBoundingClientRect().x
+                                    let boxY = box.getBoundingClientRect().y
+                                    box.classList.remove("selected")
+
+
+                                    if (boxX < clientPosX && boxX > e.clientX - 25 && boxY < clientPosY && boxY > e.clientY - 25) {
+                                        box.classList.add("selected")
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+
+                    this.selectionBlock.style.width = selectionBlockWidth + 'px' //abs => modul
+                    this.selectionBlock.style.height = selectionBlockHeight + 'px'
+
+                    this.createBlockActive = true
+                })
+                window.addEventListener('mouseup', (e) => {
+                    this.selectionBlock.style.display = 'none'
+                    this.createBlockActive = false
+                })
+
+
+            }
+
+            addMenuListeners() {
+                window.addEventListener('contextmenu', (e) => {
+                    e.preventDefault()
+                    this.menu.style.display = "block"
+                    this.menu.style.top = e.clientY + "px"
+                    this.menu.style.left = e.clientX + "px"
+                    console.log(menu)
+                })
+
+
+                window.addEventListener('click', (e) => {
+                    // console.log(menu)
+                    this.menu.style.display = "none"
+                })
+            }
+
+
+            addKeyListeners() {
+                //##WINDOWS
+                if (navigator.userAgent.includes('Windows')) {
+                    document.body.addEventListener("keyup", (e) => {
+                        switch (e.keyCode) {
+                            case 17: // CTRL
+                                console.log('ctrl dziala')
+                                this.ctrlActive = false
+                                break
+                        }
+                    })
+                    document.body.addEventListener("keydown", (e) => {
+                        switch (e.keyCode) {
+                            case 17: //17 CTRL || 93 meta
+
+                                this.ctrlActive = true
+                                console.log(ctrlActive)
+                                break
+                        }
+                    })
+                }
+
+
+                //##MACINTOSH
+                if (navigator.userAgent.includes('Macintosh')) {
+                    document.body.addEventListener("keydown", (e) => {
+                        switch (e.keyCode) {
+                            case 93: //17 CTRL || 93 meta
+                                ctrlActive = true
+                                break
+                        }
+                    })
+                    document.body.addEventListener("keyup", (e) => {
+                        switch (e.keyCode) {
+                            case 93: //17 CTRL || 93 meta
+                                ctrlActive = false
+                                break
+                        }
+                    })
+                }
+
+                window.addEventListener("keydown", e => {
+                    switch (e.keyCode) {
+                        case 46: //delete
+                            this.deleteSelectedFields()
+                            break
+
+                        case 17: //ctrl
+
+                            break
+                    }
+
+                })
+            }
+
+            deleteSelectedFields() {
+                let selected = document.querySelectorAll(".selected")
+                let img = new Image()
+                img.src = "spritesheet.png"
+                img.addEventListener("load", () => {
+                    for (let i = 0; i < selected.length; i++) {
+                        let oneSelected = selected[i]
+                        oneSelected.getContext('2d').drawImage(img, 22, 100, 48, 48, 0,
+                            0, 48, 48)
+                    }
+                })
+            }
+
+        }
+
+
+        window.addEventListener("DOMContentLoaded", () => {
+            let game = new Game()
+        })
+
+
+
+
+        // let imgData, //obrazek do kopiowania(podany z parametrami do wyciecia)
+        //     sx, //pozycja do wyciecia => x
+        //     sy, //pozycja do wyciecia => y
+        //     selected, //zaznaczone elementy pustych pol
+        //     ctrlActive = false, //czy ctrl jest aktywny
+        //     createBlockActive = false, //czy rysowanie blocku jest aktywne
+        //     automat = document.querySelector('input'), //automat
+        //     posX,
+        //     posY,
+        //     currentPosX,
+        //     currentPosY,
+
+
+        //     menu = document.getElementById('menu'), //menu po kliknieciu prawym myszki
+        //     selectionBlock = document.getElementById('selectionBlock'),
+        //     divItems = document.getElementById("items"), //miejsce do przetrzymywania obrazkow =>lewa strona
+        //     emptyFields = document.getElementById("empty_fields"), //miejsce dla pustych pol => prawa strona
+        //     tablicaLogiczna = [] //=>tablica przetrzymuje pozycje wszystkich pustych pol
+
+
+
+        // window.addEventListener("DOMContentLoaded", (e) => {
+        //     //##TWORZENIE PÓL
+        //     let sx = 0
+        //     let sy = 0
+        //     for (let y = 0; y < 40; y++) {
+        //         if (y < 20) {
+        //             sx = 0
+        //         } else {
+        //             sx = 768
+        //         }
+
+        //         if (y == 20) {
+        //             sy = 0
+        //         }
+
+        //         for (let x = 0; x < 16; x++) {
+        //             let square = new Square("spritesheet.png", 25, 25, sx, sy)
+        //             let squareHtml = square.getHtml()
+        //             divItems.appendChild(squareHtml)
+        //             sx += 48
+        //         }
+        //         sy += 48
+        //         let br = document.createElement("br")
+        //         divItems.appendChild(br)
+
+        //     }
+        //     let column = []
+        //     for (let y = 0; y < 40; y++) {
+        //         column = []
+        //         for (let x = 0; x < 40; x++) {
+        //             let emptyField = new EmptyFields(25, 25)
+        //             let emptyFieldHtml = emptyField.getHtml()
+        //             column.push(emptyFieldHtml)
+        //             emptyFields.appendChild(emptyFieldHtml)
+        //         }
+        //         tablicaLogiczna.push(column)
+        //         let br = document.createElement("br")
+        //         emptyFields.appendChild(br)
+
+        //     }
+        //     //##KONIEC TWORZENIA PÓL
+
+        //     //##WINDOWS
+        //     if (navigator.userAgent.includes('Windows')) {
+        //         document.body.addEventListener("keyup", (e) => {
+        //             switch (e.keyCode) {
+        //                 case 17: // CTRL
+        //                     console.log('ctrl dziala')
+        //                     ctrlActive = false
+        //                     break
+        //             }
+        //         })
+        //         document.body.addEventListener("keydown", (e) => {
+        //             switch (e.keyCode) {
+        //                 case 17: //17 CTRL || 93 meta
+
+        //                     ctrlActive = true
+        //                     console.log(ctrlActive)
+        //                     break
+        //             }
+        //         })
+        //     }
+        //     //##KONIEC WINDOWSA
+
+        //     //##MACINTOSH
+        //     if (navigator.userAgent.includes('Macintosh')) {
+        //         document.body.addEventListener("keydown", (e) => {
+        //             switch (e.keyCode) {
+        //                 case 93: //17 CTRL || 93 meta
+        //                     ctrlActive = true
+        //                     break
+        //             }
+        //         })
+        //         document.body.addEventListener("keyup", (e) => {
+        //             switch (e.keyCode) {
+        //                 case 93: //17 CTRL || 93 meta
+        //                     ctrlActive = false
+        //                     break
+        //             }
+        //         })
+        //     }
+        //     //##KONIEC MACINTOSHA
+
+        //     //%% FUNKCJE %%
+
+        //     //##KOPIOWANIE
+        //     document.body.addEventListener("keydown", (e) => {
+        //         console.log(e.key, e.keyCode);
+        //         if (ctrlActive && e.keyCode == 67) {
+        //             // for (let i = 0; i < selected.length; i++) {
+        //             //     let oneSelected = selected[i]
+        //             // }
+        //             console.log('kopiowanie dziala')
+        //         }
+        //         //##KONIEC KOPIOWANIA
+        //     })
+
+        //     //##USUWANIE
+        //     document.body.addEventListener("keydown", (e) => {
+        //         switch (e.keyCode) {
+        //             case 46: //delete
+        //                 console.log("działa deleted przycisk")
+        //                 let img = new Image()
+        //                 img.src = "spritesheet.png"
+        //                 img.addEventListener("load", () => {
+        //                     for (let i = 0; i < selected.length; i++) {
+        //                         let oneSelected = selected[i]
+        //                         oneSelected.getContext('2d').drawImage(img, 22, 100, 48, 48, 0,
+        //                             0, 48, 48)
+        //                     }
+        //                 })
+        //                 break
+        //         }
+        //     })
+        //     //##KONIEC USUWANIA
+
+
+        //     //##MENU
+        //     window.addEventListener('contextmenu', (e) => {
+        //         e.preventDefault()
+        //         let menu = document.getElementById('menu')
+        //         menu.style.display = "block"
+        //         menu.style.top = e.clientY + "px"
+        //         menu.style.left = e.clientX + "px"
+        //         console.log(menu)
+        //     })
+
+        //     window.addEventListener('click', (e) => {
+        //         // console.log(menu)
+        //         menu.style.display = "none"
+        //     })
+        //     //##KONIEC MENU
+
+        //     // ##AUTOMAT
+        //     automat.addEventListener('click', () => {
+        //         if (automat.checked == true) {
+        //             console.log('automat włączony')
+        //         } else if (automat.checked == false) {
+        //             console.log('automat wyłączony')
+        //         } else {
+        //             console.log('automat nie działa')
+        //         }
+        //     })
+
+        //     //##KONIEC AUTOMATU
+
+
+        //     //##SELECTION_BLOCK             //blok do zaznaczania
+        //     window.addEventListener('mousedown', (e) => {
+        //         pagePosX = e.pageX
+        //         pagePosY = e.pageY
+
+        //         clientPosX = e.clientX
+        //         clientPosY = e.clientY
+        //         selectionBlock.style.display = "block"
+
+        //         selectionBlock.style.width = 0
+        //         selectionBlock.style.height = 0
+
+        //         selectionBlock.style.left = pagePosX + "px"
+        //         selectionBlock.style.top = pagePosY + "px"
+        //         createBlockActive = true
+
+        //     })
+
+        //     window.addEventListener("mousemove", (e) => {
+        //         if (createBlockActive == false) return
+
+        //         selectionBlock.style.left = pagePosX + "px"
+        //         selectionBlock.style.top = pagePosY + "px"
+
+        //         let selectionBlockWidth, selectionBlockHeight
+        //         if (e.pageX > pagePosX) {
+        //             if (e.pageY > pagePosY) {
+        //                 selectionBlockWidth = e.pageX - pagePosX
+        //                 selectionBlockHeight = e.pageY - pagePosY
+
+        //                 for (let y in tablicaLogiczna) {
+        //                     for (let x in tablicaLogiczna[y]) {
+        //                         let box = tablicaLogiczna[y][x]
+        //                         let boxX = box.getBoundingClientRect().x
+        //                         let boxY = box.getBoundingClientRect().y
+        //                         box.classList.remove("selected")
+
+
+        //                         if (boxX + 25 > clientPosX && boxX < e.clientX && boxY + 25 > clientPosY && boxY < e.clientY) {
+        //                             box.classList.add("selected")
+        //                         }
+        //                     }
+        //                 }
+        //             } else {
+        //                 selectionBlockWidth = e.pageX - pagePosX
+        //                 selectionBlockHeight = pagePosY - e.pageY
+        //                 selectionBlock.style.top = pagePosY - selectionBlockHeight + "px"
+
+        //                 for (let y in tablicaLogiczna) {
+        //                     for (let x in tablicaLogiczna[y]) {
+        //                         let box = tablicaLogiczna[y][x]
+        //                         let boxX = box.getBoundingClientRect().x
+        //                         let boxY = box.getBoundingClientRect().y
+        //                         box.classList.remove("selected")
+
+
+        //                         if (boxX + 25 > clientPosX && boxX < e.clientX && boxY < clientPosY && boxY > e.clientY - 25) {
+        //                             box.classList.add("selected")
+        //                         }
+
+        //                     }
+        //                 }
+        //             }
+        //         }
+
+        //         if (e.pageX < pagePosX) {
+        //             if (e.pageY > pagePosY) {
+        //                 selectionBlockWidth = pagePosX - e.pageX
+        //                 selectionBlockHeight = e.pageY - pagePosY
+        //                 selectionBlock.style.left = pagePosX - selectionBlockWidth + "px"
+
+        //                 for (let y in tablicaLogiczna) {
+        //                     for (let x in tablicaLogiczna[y]) {
+        //                         let box = tablicaLogiczna[y][x]
+        //                         let boxX = box.getBoundingClientRect().x
+        //                         let boxY = box.getBoundingClientRect().y
+        //                         box.classList.remove("selected")
+
+
+        //                         if (boxX < clientPosX && boxX > e.clientX - 25 && boxY + 25 > clientPosY && boxY < e.clientY) {
+        //                             box.classList.add("selected")
+        //                         }
+        //                     }
+        //                 }
+        //             } else {
+        //                 selectionBlockWidth = pagePosX - e.pageX
+        //                 selectionBlockHeight = pagePosY - e.pageY
+        //                 selectionBlock.style.left = pagePosX - selectionBlockWidth + "px"
+        //                 selectionBlock.style.top = pagePosY - selectionBlockHeight + "px"
+
+        //                 for (let y in tablicaLogiczna) {
+        //                     for (let x in tablicaLogiczna[y]) {
+        //                         let box = tablicaLogiczna[y][x]
+        //                         let boxX = box.getBoundingClientRect().x
+        //                         let boxY = box.getBoundingClientRect().y
+        //                         box.classList.remove("selected")
+
+
+        //                         if (boxX < clientPosX && boxX > e.clientX - 25 && boxY < clientPosY && boxY > e.clientY - 25) {
+        //                             box.classList.add("selected")
+        //                         }
+        //                     }
+        //                 }
+        //             }
+
+        //         }
+
+
+        //         selectionBlock.style.width = selectionBlockWidth + 'px' //abs => modul
+        //         selectionBlock.style.height = selectionBlockHeight + 'px'
+
+        //         createBlockActive = true
+        //     })
+        //     window.addEventListener('mouseup', (e) => {
+        //         selectionBlock.style.display = 'none'
+        //         createBlockActive = false
+        //     })
+
+
+        //     //##KONIEC SELECTION_BLOCK
+
+        // })
+
+
+        /*spritesheet wymiary*/
+        /*wysokośc == 20*/
+        /*szerokosc == 32*/
+        /*POPRAWKI*/
+        /*
+        1.problem z wyglądem od 100% view
+        2.wielkosc bloczkow w empty fields
+        */
+    </script>
+</body>
+
+</html>😁
