@@ -1,6 +1,6 @@
 PAC MAN MAP GENERATOR
 
-link:http://mati028.ct8.pl/pac_man_generator/
+link:https://dazzling-hypatia-155b23.netlify.app/
 
 option:
 right mouse button:undo,redo,cut,copy,past,delete,save to file,load data from file
